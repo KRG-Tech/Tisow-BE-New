@@ -1,0 +1,31 @@
+# DB:
+#   host: "{{DB_HOST}}"
+#   port: "{{DB_PORT}}"
+#   username: "{{DB_USERNAME}}"
+#   password: "{{DB_PASSWORD}}"
+#   database: "{{DB_NAME}}"
+
+DB:
+  host: "localhost"
+  port: "3306"
+  username: "root"
+  password: "root"
+  database: "raw_data"
+  
+admin:
+  username: Admin
+  password: Bala@123
+  email: balas@krgtech.com
+
+
+
+mqtt:
+  username: TEdge
+  password: TEdgeMosquitto1883
+  port: 1883
+  host: localhost
+  topics:
+    new_device: "devices/new"
+
+websocket:
+  topic: live_data

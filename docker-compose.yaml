@@ -1,0 +1,20 @@
+services:
+  tisow_be:
+    container_name: tisow_be
+    build: .
+    image: tisow_be_v1
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./app/configurations.yaml:/app/configurations.yaml"  # Bind mount for the configuration file
+    environment:
+      - CONFIG_PATH=/app/configurations.yaml  # Optional: Set environment variable to specify config location
+    networks:
+      - internalnet  # Specify the same network as Angular
+    restart: always
+
+networks:
+  internalnet:
+    name: internalnet
+    driver: bridge
+
