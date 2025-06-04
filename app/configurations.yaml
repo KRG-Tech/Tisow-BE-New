@@ -5,20 +5,10 @@ DB:
   password: "{{DB_PASSWORD}}"
   database: "{{DB_NAME}}"
 
-# DB:
-#   host: "localhost"
-#   port: "3306"
-#   username: "root"
-#   password: "root"
-#   database: "raw_data"
-  
 admin:
   username: Admin
   password: Bala@123
   email: balas@krgtech.com
-
-
-
 mqtt:
   username: TEdge
   password: TEdgeMosquitto1883
