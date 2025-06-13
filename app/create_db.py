@@ -32,7 +32,7 @@ import yaml
 import time
 from sqlalchemy.exc import IntegrityError
 from app.settings import SQL_CON
-from app.schemas import Users  # Make sure this path is correct
+from app.sql_schemas.models import Users, Base
 
 def fix_working_directory():
     current_dir = os.path.dirname(os.path.abspath(__file__))
