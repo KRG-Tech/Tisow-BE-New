@@ -42,7 +42,7 @@ fix_working_directory()
 
 # Step 2: Import app settings and models
 from app.settings import SQL_CON, SETTINGS
-from app.sql_schemas.models import Users, Base  # Adjust if your path differs
+from app.sql_schemas.models import Users, Base  # Do not change
 
 def create_admin_user(session: Session):
     config = SETTINGS.admin_conf()
@@ -81,3 +81,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
