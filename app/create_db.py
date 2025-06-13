@@ -55,7 +55,7 @@ def create_admin_user(session: Session):
         print("ℹ️ Admin user already exists. Skipping creation.")
         return
 
-    hashed_password = generate_password_hash(password)
+    hashed_password = hashed_password = password
 
     admin = Users(
         first_name=username,
