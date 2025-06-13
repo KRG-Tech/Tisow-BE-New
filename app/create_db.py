@@ -28,58 +28,56 @@
 
 import os
 import sys
-import yaml
 import time
-from sqlalchemy.exc import IntegrityError
-from app.settings import SQL_CON
-from app.sql_schemas.models import Users, Base
+from sqlalchemy.orm import Session
+from werkzeug.security import generate_password_hash
 
+# Step 1: Fix working directory (so relative imports work)
 def fix_working_directory():
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    os.chdir(os.path.join(current_dir, ".."))
+    project_root = os.path.abspath(os.path.join(current_dir, ".."))
+    os.chdir(project_root)
 
 fix_working_directory()
 
-def create_admin_user():
-    config_path = os.path.join("app", "configuration.yaml")
-    if not os.path.exists(config_path):
-        print("❌ configuration.yaml not found.")
-        return
+# Step 2: Import app settings and models
+from app.settings import SQL_CON, SETTINGS
+from app.sql_schemas.models import Users, Base  # Adjust if your path differs
 
-    with open(config_path, "r") as file:
-        config = yaml.safe_load(file)
+def create_admin_user(session: Session):
+    config = SETTINGS.admin_conf()
+    username = config["username"]
+    email = config["email"]
+    password = config["password"]
 
-    admin_data = config.get("admin")
-    if not admin_data:
-        print("❌ Admin data not found in configuration.yaml.")
-        return
-
-    db_session = next(SQL_CON.get_db())
-
-    existing = db_session.query(Users).filter_by(email=admin_data["email"]).first()
+    existing = session.query(Users).filter_by(email=email).first()
     if existing:
-        print("ℹ️ Admin user already exists.")
+        print("ℹ️ Admin user already exists. Skipping creation.")
         return
 
-    # Map 'username' to 'first_name'
-    user = Users(
-        first_name=admin_data["username"],
-        email=admin_data["email"],
-        password=admin_data["password"],
-        is_admin=True
+    hashed_password = generate_password_hash(password)
+
+    admin = Users(
+        first_name=username,
+        second_name="",
+        email=email,
+        password=hashed_password,
+        is_deleted=False,
+        is_admin=True,
+        timestamp=int(time.time()),
+        role="admin",
+        rule="fullaccess"
     )
-    db_session.add(user)
-    try:
-        db_session.commit()
-        print("✅ Admin user created successfully.")
-    except IntegrityError:
-        db_session.rollback()
-        print("⚠️ Failed to create admin user due to IntegrityError.")
+    session.add(admin)
+    session.commit()
+    print("✅ Admin user created successfully.")
 
 def main():
-    for _ in SQL_CON.get_db():
+    print("⚙️ Creating database and tables...")
+    for db in SQL_CON.get_db():
+        Base.metadata.create_all(bind=SQL_CON.engine)
+        create_admin_user(db)
         print("✅ Database and tables initialized successfully.")
-    create_admin_user()
 
 if __name__ == "__main__":
     main()
