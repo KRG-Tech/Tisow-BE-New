@@ -51,17 +51,17 @@ def create_admin_user(session: Session):
     email = config["email"]
     password = config["password"]
 
-    existing = session.query(User).filter_by(username=username).first()
+    existing = session.query(Users).filter_by(username=username).first()
     if existing:
         print("ℹ️ Admin user already exists. Skipping creation.")
         return
 
     hashed_password = generate_password_hash(password)
-    admin = User(
+    admin = Users(
         username=username,
         email=email,
         password=hashed_password,
-        role="admin"  # Ensure your User model has a 'role' field or remove if not applicable
+        role="admin"  
     )
     session.add(admin)
     session.commit()
