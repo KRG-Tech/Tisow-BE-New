@@ -58,7 +58,7 @@ def create_admin_user(session: Session):
 
     hashed_password = generate_password_hash(password)
     admin = Users(
-        username=username,
+        first_name=username,
         email=email,
         password=hashed_password,
         role="admin"  
