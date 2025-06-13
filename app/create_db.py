@@ -28,51 +28,58 @@
 
 import os
 import sys
+import yaml
+import time
+from sqlalchemy.exc import IntegrityError
+from app.settings import SQL_CON
+from app.schemas import Users  # Make sure this path is correct
 
 def fix_working_directory():
-    """
-    Fix working directory to project root so relative paths work,
-    especially when running from .bat files.
-    """
     current_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(os.path.join(current_dir, ".."))
 
 fix_working_directory()
 
-
-from app.settings import SQL_CON, SETTINGS
-from app.sql_schemas.models import Users, Base  
-from sqlalchemy.orm import Session
-from werkzeug.security import generate_password_hash  # You can also use bcrypt or hashlib
-
-def create_admin_user(session: Session):
-    config = SETTINGS.admin_conf()
-    username = config["username"]
-    email = config["email"]
-    password = config["password"]
-
-    existing = session.query(Users).filter_by(username=username).first()
-    if existing:
-        print("ℹ️ Admin user already exists. Skipping creation.")
+def create_admin_user():
+    config_path = os.path.join("app", "configuration.yaml")
+    if not os.path.exists(config_path):
+        print("❌ configuration.yaml not found.")
         return
 
-    hashed_password = generate_password_hash(password)
-    admin = Users(
-        first_name=username,
-        email=email,
-        password=hashed_password,
-        role="admin"  
+    with open(config_path, "r") as file:
+        config = yaml.safe_load(file)
+
+    admin_data = config.get("admin")
+    if not admin_data:
+        print("❌ Admin data not found in configuration.yaml.")
+        return
+
+    db_session = next(SQL_CON.get_db())
+
+    existing = db_session.query(Users).filter_by(email=admin_data["email"]).first()
+    if existing:
+        print("ℹ️ Admin user already exists.")
+        return
+
+    # Map 'username' to 'first_name'
+    user = Users(
+        first_name=admin_data["username"],
+        email=admin_data["email"],
+        password=admin_data["password"],
+        is_admin=True
     )
-    session.add(admin)
-    session.commit()
-    print("✅ Admin user created successfully.")
+    db_session.add(user)
+    try:
+        db_session.commit()
+        print("✅ Admin user created successfully.")
+    except IntegrityError:
+        db_session.rollback()
+        print("⚠️ Failed to create admin user due to IntegrityError.")
 
 def main():
-    for db in SQL_CON.get_db():
-        print("⚙️ Creating database and tables...")
-        create_admin_user(db)
+    for _ in SQL_CON.get_db():
         print("✅ Database and tables initialized successfully.")
+    create_admin_user()
 
 if __name__ == "__main__":
     main()
-
