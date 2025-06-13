@@ -41,7 +41,7 @@ fix_working_directory()
 
 
 from app.settings import SQL_CON, SETTINGS
-from app.sql_schemas.models import User, Base  
+from app.sql_schemas.models import Users, Base  
 from sqlalchemy.orm import Session
 from werkzeug.security import generate_password_hash  # You can also use bcrypt or hashlib
 
