@@ -66,7 +66,7 @@ def create_admin_user(session: Session):
         is_admin=True,
         timestamp=int(time.time()),
         role="admin",
-        rule="fullaccess"
+        rule="write"
     )
     session.add(admin)
     session.commit()
